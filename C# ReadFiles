@@ -1,0 +1,141 @@
+using System;
+using System.IO;
+
+namespace files
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int num=0;
+            string datetime="",weather="";
+
+            Console.WriteLine("Choose the number of the line you want to read (1-5)");
+            string fields= ReadLines();
+        
+            for(int i=0;i< fields.Length; i++)
+            {
+                char numbers =fields[i];
+                if(char.IsNumber(numbers))
+                {
+                    datetime=datetime+numbers;
+                }
+                else if(i==31)
+                {
+                    break;
+                }
+                else
+                {
+                    datetime=datetime+",";
+                }
+            }
+
+            for(int b=31;b<fields.Length;b++)
+            {
+                char numbers = fields[b];
+                if(char.IsNumber(numbers))
+                {
+                    weather=weather+numbers;
+                }
+                else
+                {
+                    weather=weather+",";
+                }
+            }
+            
+           
+           string[] timeData=datetime.Split(',');
+           string[] weatherData=weather.Split(',');
+           
+           //transform values to binary
+           string bin="";
+
+           for(int a=0;a< timeData.Length;a++)
+           {
+               num=(int.Parse(timeData[a]));
+               string Ftime = ToBinary(num);
+               bin= bin+Ftime;
+           }
+
+           long timeDecimal=(ToDecimal(bin));   // codified time data
+
+           Console.WriteLine("\n");
+          for(int c=0;c < weatherData.Length;c++)
+          {
+              num=(int.Parse(weatherData[c]));
+               string Fweather = ToBinary(num);
+               
+               bin= bin+Fweather;
+          }
+          long weatherDecimal=(ToDecimal(bin));      // codified time data
+
+
+          AddRecord(timeDecimal,weatherDecimal);  
+
+        }
+
+        public static string ReadLines()                 //Read all the lines in a csv file and return one of the lines on a string variable
+        {
+            int option= (int.Parse(Console.ReadLine()));
+
+            string[] Lines = System.IO.File.ReadAllLines("file.csv");
+            if(option>0 || option<6)
+            {
+                string fields= Lines[option];
+
+                return fields;
+            }
+           else
+           {
+               Console.WriteLine("Valor no valido");
+               return null;
+           }
+              
+        }
+
+        public static void AddRecord(long timeDecimal,long weatherDecimal)   //writes the codified data (integer form) in another csv file
+        {
+            timeDecimal=Math.Abs(timeDecimal);
+            weatherDecimal=Math.Abs(weatherDecimal);
+            using(System.IO.StreamWriter file =new System.IO.StreamWriter("outFile.csv",true))
+            {
+                file.WriteLine("DateAndTime,Climate");
+                file.WriteLine("{0},{1}\n", timeDecimal,weatherDecimal);
+            }
+        }
+
+        public static string ToBinary(int num)   //Transform decimal numbers to binary
+        {
+            string bin="";
+            int num2=0;
+
+            while(num>0)
+            {     
+                num2=num%2;
+                num=num/2;
+                bin=num2.ToString()+bin;
+            }
+            
+            return bin;
+
+        }
+
+        public static long ToDecimal(string bin)    //transform binary numbers to decimal numbers
+        {
+
+            
+            long n=0;
+            
+
+            for(int x=bin.Length-1,y=0;x>=0;x--,y++)
+            {
+                if(bin[x]=='0'||bin[x]=='1')
+                {
+                    n+=(int)(int.Parse(bin[x].ToString())*Math.Pow(2,y));
+                }
+            }
+            return n;
+
+        }
+    }
+}
